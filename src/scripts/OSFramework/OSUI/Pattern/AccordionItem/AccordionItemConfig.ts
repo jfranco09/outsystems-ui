@@ -4,6 +4,7 @@ namespace OSFramework.OSUI.Patterns.AccordionItem {
 		public Icon: string;
 		public IconPosition: string;
 		public IsDisabled: boolean;
+		public PreserveStatus = false;
 		public StartsExpanded: boolean;
 
 		constructor(config: JSON) {

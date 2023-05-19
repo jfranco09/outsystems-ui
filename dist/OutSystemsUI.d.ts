@@ -1256,6 +1256,7 @@ declare namespace OSFramework.OSUI.Patterns.AccordionItem {
         private _eventOnkeyPress;
         private _expandedHeight;
         private _isOpen;
+        private _lastStatus;
         private _platformEventOnToggle;
         constructor(uniqueId: string, configs: JSON);
         private _accordionOnClickHandler;
@@ -1292,6 +1293,7 @@ declare namespace OSFramework.OSUI.Patterns.AccordionItem {
         Icon: string;
         IconPosition: string;
         IsDisabled: boolean;
+        PreserveStatus: boolean;
         StartsExpanded: boolean;
         constructor(config: JSON);
         validateCanChange(isBuilt: boolean, key: string): boolean;

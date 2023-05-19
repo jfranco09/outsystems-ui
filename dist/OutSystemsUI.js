@@ -3471,11 +3471,18 @@ var OSFramework;
         (function (Patterns) {
             var AccordionItem;
             (function (AccordionItem_1) {
+                const _accordionItemStatusMap = new Map();
                 class AccordionItem extends Patterns.AbstractChild {
                     constructor(uniqueId, configs) {
                         super(uniqueId, new AccordionItem_1.AccordionItemConfig(configs));
                         this._collapsedHeight = 0;
                         this._isOpen = this.configs.StartsExpanded;
+                        if (_accordionItemStatusMap.has(uniqueId)) {
+                            this._isOpen = _accordionItemStatusMap.get(uniqueId);
+                        }
+                        else {
+                            _accordionItemStatusMap.set(uniqueId, this._isOpen);
+                        }
                     }
                     _accordionOnClickHandler(event) {
                         if (this._allowTitleEvents) {
@@ -3507,10 +3514,12 @@ var OSFramework;
                         if (isExpand) {
                             OSUI.Helper.Dom.Styles.AddClass(this._accordionItemContentElem, AccordionItem_1.Enum.CssClass.PatternExpanded);
                             this._isOpen = true;
+                            _accordionItemStatusMap.set(this.uniqueId, this._isOpen);
                         }
                         else {
                             OSUI.Helper.Dom.Styles.AddClass(this._accordionItemContentElem, AccordionItem_1.Enum.CssClass.PatternCollapsed);
                             this._isOpen = false;
+                            _accordionItemStatusMap.set(this.uniqueId, this._isOpen);
                         }
                         this.setA11YProperties();
                         this._onToggleCallback();
@@ -3637,6 +3646,7 @@ var OSFramework;
                         this._eventOnkeyPress = this._onKeyboardPress.bind(this);
                     }
                     setHtmlElements() {
+                        console.log(this._lastStatus);
                         this._accordionItemTitleElem = OSUI.Helper.Dom.ClassSelector(this.selfElement, AccordionItem_1.Enum.CssClass.PatternTitle);
                         this._accordionItemContentElem = OSUI.Helper.Dom.ClassSelector(this.selfElement, AccordionItem_1.Enum.CssClass.PatternContent);
                         this._accordionItemIconElem = OSUI.Helper.Dom.ClassSelector(this.selfElement, AccordionItem_1.Enum.CssClass.PatternIcon);
@@ -3715,8 +3725,11 @@ var OSFramework;
                         OSUI.Helper.AsyncInvocation(() => {
                             this._animationAsync(false);
                         });
+                        this._lastStatus = this._isOpen;
                     }
                     dispose() {
+                        this._lastStatus = this._isOpen;
+                        console.log('this._lastStatus - ', this._lastStatus);
                         this.unsetCallbacks();
                         this._removeEvents();
                         if (this.parentObject) {
@@ -3744,6 +3757,7 @@ var OSFramework;
                         if (this.parentObject) {
                             this.notifyParent(Patterns.Accordion.Enum.ChildNotifyActionType.Click);
                         }
+                        this._lastStatus = this._isOpen;
                     }
                     registerCallback(callback) {
                         if (this._platformEventOnToggle === undefined) {
@@ -3770,6 +3784,7 @@ var OSFramework;
                 class AccordionItemConfig extends Patterns.AbstractConfiguration {
                     constructor(config) {
                         super(config);
+                        this.PreserveStatus = false;
                     }
                     validateCanChange(isBuilt, key) {
                         if (isBuilt) {

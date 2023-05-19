@@ -1,5 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 namespace OSFramework.OSUI.Patterns.AccordionItem {
+	const _accordionItemStatusMap = new Map<string, boolean>();
+
 	/**
 	 * Defines the interface for OutSystemsUI Patterns
 	 */
@@ -31,6 +33,7 @@ namespace OSFramework.OSUI.Patterns.AccordionItem {
 		private _expandedHeight: number;
 		// Stores if the element is open
 		private _isOpen: boolean;
+		private _lastStatus: boolean;
 		// Callback function to trigger the click event on the platform
 		private _platformEventOnToggle: GlobalCallbacks.Generic;
 
@@ -38,6 +41,14 @@ namespace OSFramework.OSUI.Patterns.AccordionItem {
 			super(uniqueId, new AccordionItemConfig(configs));
 
 			this._isOpen = this.configs.StartsExpanded;
+
+			//if (_accordionItemStatusMap.has(uniqueId) && this.configs.PreserveStatus)
+			//here we should also validate the flag of the API feature
+			if (_accordionItemStatusMap.has(uniqueId)) {
+				this._isOpen = _accordionItemStatusMap.get(uniqueId);
+			} else {
+				_accordionItemStatusMap.set(uniqueId, this._isOpen);
+			}
 		}
 
 		// Method to handle the click event
@@ -91,10 +102,14 @@ namespace OSFramework.OSUI.Patterns.AccordionItem {
 				// End of animation, item is expanded
 				Helper.Dom.Styles.AddClass(this._accordionItemContentElem, Enum.CssClass.PatternExpanded);
 				this._isOpen = true;
+				//here we should also validate the flag of the API feature
+				_accordionItemStatusMap.set(this.uniqueId, this._isOpen);
 			} else {
 				// End of animation, item is collapsed
 				Helper.Dom.Styles.AddClass(this._accordionItemContentElem, Enum.CssClass.PatternCollapsed);
 				this._isOpen = false;
+				//here we should also validate the flag of the API feature
+				_accordionItemStatusMap.set(this.uniqueId, this._isOpen);
 			}
 
 			this.setA11YProperties();
@@ -301,6 +316,7 @@ namespace OSFramework.OSUI.Patterns.AccordionItem {
 		 * @memberof OSFramework.Patterns.AccordionItem.AccordionItem
 		 */
 		protected setHtmlElements(): void {
+			console.log(this._lastStatus);
 			this._accordionItemTitleElem = Helper.Dom.ClassSelector(this.selfElement, Enum.CssClass.PatternTitle);
 			this._accordionItemContentElem = Helper.Dom.ClassSelector(this.selfElement, Enum.CssClass.PatternContent);
 			this._accordionItemIconElem = Helper.Dom.ClassSelector(this.selfElement, Enum.CssClass.PatternIcon);
@@ -463,6 +479,7 @@ namespace OSFramework.OSUI.Patterns.AccordionItem {
 			Helper.AsyncInvocation(() => {
 				this._animationAsync(false);
 			});
+			this._lastStatus = this._isOpen;
 		}
 
 		/**
@@ -471,6 +488,8 @@ namespace OSFramework.OSUI.Patterns.AccordionItem {
 		 * @memberof OSFramework.Patterns.AccordionItem.AccordionItem
 		 */
 		public dispose(): void {
+			this._lastStatus = this._isOpen;
+			console.log('this._lastStatus - ', this._lastStatus);
 			this.unsetCallbacks();
 			this._removeEvents();
 
@@ -527,6 +546,7 @@ namespace OSFramework.OSUI.Patterns.AccordionItem {
 			if (this.parentObject) {
 				this.notifyParent(Accordion.Enum.ChildNotifyActionType.Click);
 			}
+			this._lastStatus = this._isOpen;
 		}
 
 		/**
